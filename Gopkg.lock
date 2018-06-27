@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "code.cloudfoundry.org/lager"
+  packages = ["."]
+  revision = "b60e04e119450552243196105bae0d42179ee0ca"
+  version = "v1.1.0"
+
+[[projects]]
   name = "github.com/go-redis/redis"
   packages = [
     ".",
@@ -28,9 +34,18 @@
   revision = "e3702bed27f0d39777b0b37b664b6280e8ef8fbf"
   version = "v1.6.2"
 
+[[projects]]
+  name = "github.com/pivotal-cf/brokerapi"
+  packages = [
+    ".",
+    "auth"
+  ]
+  revision = "633c7acd4d3a4d5e787c17728ea18b20681bf471"
+  version = "v2.0.3"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "842df7c474d1a15566cb5e044e376d51640ad2fdb56430f4b2d92e5323fe4837"
+  inputs-digest = "47d9e257fcba2e6e793a26176d5d6b415c8e2840e44bda8711e7363fd45344cc"
   solver-name = "gps-cdcl"
   solver-version = 1

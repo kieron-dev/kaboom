@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -8,12 +9,82 @@ import (
 	"net/http"
 	"os"
 
+	"code.cloudfoundry.org/lager"
 	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
+	"github.com/pivotal-cf/brokerapi"
 )
 
+const SERVICE_PREFIX = "svc_"
+
 type registerServiceData struct {
+	Name          string `json:"name"`
 	HelmChartName string `json:"helm_chart_name"`
+}
+
+type kaboomBroker struct {
+	redisClient *redis.Client
+}
+
+func (k *kaboomBroker) Services(ctx context.Context) (catalog []brokerapi.Service, err error) {
+	log.Println("starting catalog request")
+	stringSlice := k.redisClient.Keys(fmt.Sprintf("%s*", SERVICE_PREFIX))
+	if stringSlice.Err() != nil {
+		log.Println("could not fetch keys from redis")
+		return nil, stringSlice.Err()
+	}
+	for _, key := range stringSlice.Val() {
+		getStatus := k.redisClient.Get(key)
+		if getStatus.Err() != nil {
+			log.Printf("could not get redis key: %v", key)
+			return nil, err
+		}
+		v := getStatus.Val()
+		s := new(registerServiceData)
+		if err := json.Unmarshal([]byte(v), s); err != nil {
+			log.Printf("could not unmarshal redis value: %v", v)
+			return nil, err
+		}
+		catalog = append(catalog, brokerapi.Service{
+			ID:            s.Name,
+			Name:          s.Name,
+			Bindable:      true,
+			PlanUpdatable: false,
+			Plans: []brokerapi.ServicePlan{
+				{
+					ID:          "default",
+					Name:        "Default",
+					Description: "Just the default",
+				},
+			},
+		})
+	}
+	log.Println("all done - returning")
+	return
+}
+
+func (k *kaboomBroker) Provision(ctx context.Context, instanceID string, details brokerapi.ProvisionDetails, asyncAllowed bool) (brokerapi.ProvisionedServiceSpec, error) {
+	panic("not implemented")
+}
+
+func (k *kaboomBroker) Deprovision(ctx context.Context, instanceID string, details brokerapi.DeprovisionDetails, asyncAllowed bool) (brokerapi.DeprovisionServiceSpec, error) {
+	panic("not implemented")
+}
+
+func (k *kaboomBroker) Bind(ctx context.Context, instanceID string, bindingID string, details brokerapi.BindDetails) (brokerapi.Binding, error) {
+	panic("not implemented")
+}
+
+func (k *kaboomBroker) Unbind(ctx context.Context, instanceID string, bindingID string, details brokerapi.UnbindDetails) error {
+	panic("not implemented")
+}
+
+func (k *kaboomBroker) Update(ctx context.Context, instanceID string, details brokerapi.UpdateDetails, asyncAllowed bool) (brokerapi.UpdateServiceSpec, error) {
+	panic("not implemented")
+}
+
+func (k *kaboomBroker) LastOperation(ctx context.Context, instanceID string, operationData string) (brokerapi.LastOperation, error) {
+	panic("not implemented")
 }
 
 func main() {
@@ -51,7 +122,15 @@ func main() {
 			return
 		}
 
-		status := redisClient.Set(name, j.HelmChartName, 0)
+		j.Name = name
+		serviceJson, err := json.Marshal(j)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintln(w, err.Error())
+			return
+		}
+
+		status := redisClient.Set(fmt.Sprintf("%s%s", SERVICE_PREFIX, name), string(serviceJson), 0)
 		if status.Err() != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprintln(w, status.Err().Error())
@@ -69,6 +148,11 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "OK")
 	}).Methods("GET")
+
+	broker := &kaboomBroker{
+		redisClient: redisClient,
+	}
+	brokerapi.AttachRoutes(brokerRouter, broker, lager.NewLogger("kaboom"))
 
 	s := &http.Server{
 		Addr:    ":80",
