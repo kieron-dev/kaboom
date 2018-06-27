@@ -1,0 +1,6 @@
+---
+
+dependencies:
+- name: redis
+  version: 3.6.0
+  repository: "@stable"

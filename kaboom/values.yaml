@@ -43,3 +43,6 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+redis:
+  usePassword: false
