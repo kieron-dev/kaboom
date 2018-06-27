@@ -2,15 +2,25 @@ package main
 
 import (
 	"fmt"
-	"html"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+	brokerRouter := mux.NewRouter()
+	brokerRouter.HandleFunc("/register_service", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello, world!")
 	})
 
-	log.Fatal(http.ListenAndServe(":80", nil))
+	brokerRouter.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "OK")
+	})
+
+	s := &http.Server{
+		Addr:    ":80",
+		Handler: brokerRouter,
+	}
+	log.Fatal(s.ListenAndServe())
 }

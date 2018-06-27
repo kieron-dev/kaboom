@@ -7,7 +7,7 @@ replicaCount: 1
 image:
   repository: cflondonservices/kaboom
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   type: ClusterIP
