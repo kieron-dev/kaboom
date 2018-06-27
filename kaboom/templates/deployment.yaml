@@ -26,6 +26,8 @@ spec:
           env:
           - name: REDIS_SERVER
             value: {{ .Release.Name }}-redis-master
+          - name: HELM_HOST
+            value: tiller-deploy.kube-system.svc.cluster.local:44134
           ports:
             - name: http
               containerPort: 80

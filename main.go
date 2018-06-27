@@ -8,6 +8,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
+	"strings"
+	"time"
 
 	"code.cloudfoundry.org/lager"
 	"github.com/go-redis/redis"
@@ -48,11 +51,12 @@ func (k *kaboomBroker) Services(ctx context.Context) (catalog []brokerapi.Servic
 		catalog = append(catalog, brokerapi.Service{
 			ID:            s.Name,
 			Name:          s.Name,
+			Description:   "ye",
 			Bindable:      true,
 			PlanUpdatable: false,
 			Plans: []brokerapi.ServicePlan{
 				{
-					ID:          "default",
+					ID:          fmt.Sprintf("plan-%s", s.Name),
 					Name:        "Default",
 					Description: "Just the default",
 				},
@@ -64,7 +68,53 @@ func (k *kaboomBroker) Services(ctx context.Context) (catalog []brokerapi.Servic
 }
 
 func (k *kaboomBroker) Provision(ctx context.Context, instanceID string, details brokerapi.ProvisionDetails, asyncAllowed bool) (brokerapi.ProvisionedServiceSpec, error) {
-	panic("not implemented")
+	getStatus := k.redisClient.Get(fmt.Sprintf("%s%s", SERVICE_PREFIX, details.ServiceID))
+	if getStatus.Err() != nil {
+		log.Printf("getStatus.Err() = %+v\n", getStatus.Err())
+		return brokerapi.ProvisionedServiceSpec{}, getStatus.Err()
+	}
+
+	v := getStatus.Val()
+	s := new(registerServiceData)
+	if err := json.Unmarshal([]byte(v), s); err != nil {
+		log.Printf("could not unmarshal redis value: %v", v)
+		return brokerapi.ProvisionedServiceSpec{}, err
+	}
+
+	name := s.HelmChartName
+	output, err := installChart(name)
+	if err != nil {
+		log.Printf("Error while installing helm chart: %v - %v", err, output)
+		return brokerapi.ProvisionedServiceSpec{}, err
+	}
+
+	log.Println("ALL GOOD")
+	log.Println(output)
+
+	lines := strings.Split(output, "\n")
+	words := strings.Split(lines[0], " ")
+	release := words[len(words)-1]
+
+	return brokerapi.ProvisionedServiceSpec{
+		IsAsync:       true,
+		OperationData: fmt.Sprintf("{\"release_name\": \"%s\"}", release),
+	}, nil
+}
+
+func (k *kaboomBroker) LastOperation(ctx context.Context, instanceID string, operationData string) (brokerapi.LastOperation, error) {
+	time.Sleep(time.Second * 2)
+	dtls := struct {
+		ReleaseName string `json:"release_name"`
+	}{}
+	err := json.Unmarshal([]byte(operationData), &dtls)
+	if err != nil {
+		log.Printf("Couldn't unmarshal operation data: %s\n", operationData)
+		return brokerapi.LastOperation{}, err
+	}
+	return brokerapi.LastOperation{
+		State:       "succeeded",
+		Description: fmt.Sprintf("Successfully deployed release %s\n", dtls.ReleaseName),
+	}, nil
 }
 
 func (k *kaboomBroker) Deprovision(ctx context.Context, instanceID string, details brokerapi.DeprovisionDetails, asyncAllowed bool) (brokerapi.DeprovisionServiceSpec, error) {
@@ -83,8 +133,16 @@ func (k *kaboomBroker) Update(ctx context.Context, instanceID string, details br
 	panic("not implemented")
 }
 
-func (k *kaboomBroker) LastOperation(ctx context.Context, instanceID string, operationData string) (brokerapi.LastOperation, error) {
-	panic("not implemented")
+func installChart(name string) (string, error) {
+	helmHost := os.Getenv("HELM_HOST")
+	command := exec.Command("helm", "--host", helmHost, "install", name)
+	o, err := command.CombinedOutput()
+	if err != nil {
+		log.Printf("Error installing chart: %s - %v", string(o), err)
+		return "", err
+	}
+	log.Printf("IT WORKS. %v", string(o))
+	return string(o), nil
 }
 
 func main() {

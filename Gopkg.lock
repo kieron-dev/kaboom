@@ -8,6 +8,24 @@
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/BurntSushi/toml"
+  packages = ["."]
+  revision = "b26d9c308763d68093482582cea63d69be07a0f0"
+  version = "v0.3.0"
+
+[[projects]]
+  name = "github.com/Masterminds/semver"
+  packages = ["."]
+  revision = "c7af12943936e8c39859482e61f0574c2fd7fc75"
+  version = "v1.4.2"
+
+[[projects]]
+  name = "github.com/ghodss/yaml"
+  packages = ["."]
+  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
+  version = "v1.0.0"
+
+[[projects]]
   name = "github.com/go-redis/redis"
   packages = [
     ".",
@@ -23,6 +41,33 @@
   version = "v6.12.0"
 
 [[projects]]
+  name = "github.com/gobwas/glob"
+  packages = [
+    ".",
+    "compiler",
+    "match",
+    "syntax",
+    "syntax/ast",
+    "syntax/lexer",
+    "util/runes",
+    "util/strings"
+  ]
+  revision = "5ccd90ef52e1e632236f7326478d4faa74f99438"
+  version = "v0.2.3"
+
+[[projects]]
+  name = "github.com/golang/protobuf"
+  packages = [
+    "proto",
+    "ptypes",
+    "ptypes/any",
+    "ptypes/duration",
+    "ptypes/timestamp"
+  ]
+  revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
+  version = "v1.1.0"
+
+[[projects]]
   name = "github.com/gorilla/context"
   packages = ["."]
   revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
@@ -35,6 +80,12 @@
   version = "v1.6.2"
 
 [[projects]]
+  name = "github.com/kubernetes/helm"
+  packages = ["pkg/helm"]
+  revision = "69f66629c45592f83146e43594c2ae32b18ca652"
+  version = "v2.0.0-alpha.2"
+
+[[projects]]
   name = "github.com/pivotal-cf/brokerapi"
   packages = [
     ".",
@@ -43,9 +94,109 @@
   revision = "633c7acd4d3a4d5e787c17728ea18b20681bf471"
   version = "v2.0.3"
 
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = [
+    "context",
+    "http/httpguts",
+    "http2",
+    "http2/hpack",
+    "idna",
+    "internal/timeseries",
+    "trace"
+  ]
+  revision = "afe8f62b1d6bbd81f31868121a50b06d8188e1f9"
+
+[[projects]]
+  name = "golang.org/x/text"
+  packages = [
+    "collate",
+    "collate/build",
+    "internal/colltab",
+    "internal/gen",
+    "internal/tag",
+    "internal/triegen",
+    "internal/ucd",
+    "language",
+    "secure/bidirule",
+    "transform",
+    "unicode/bidi",
+    "unicode/cldr",
+    "unicode/norm",
+    "unicode/rangetable"
+  ]
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
+
+[[projects]]
+  branch = "master"
+  name = "google.golang.org/genproto"
+  packages = ["googleapis/rpc/status"]
+  revision = "80063a038e333bbe006c878e4c5ce4c74d055498"
+
+[[projects]]
+  name = "google.golang.org/grpc"
+  packages = [
+    ".",
+    "balancer",
+    "balancer/base",
+    "balancer/roundrobin",
+    "codes",
+    "connectivity",
+    "credentials",
+    "encoding",
+    "encoding/proto",
+    "grpclog",
+    "internal",
+    "internal/backoff",
+    "internal/channelz",
+    "internal/grpcrand",
+    "keepalive",
+    "metadata",
+    "naming",
+    "peer",
+    "resolver",
+    "resolver/dns",
+    "resolver/passthrough",
+    "stats",
+    "status",
+    "tap",
+    "transport"
+  ]
+  revision = "168a6198bcb0ef175f7dacec0b8691fc141dc9b8"
+  version = "v1.13.0"
+
+[[projects]]
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
+  version = "v2.2.1"
+
+[[projects]]
+  branch = "master"
+  name = "k8s.io/apimachinery"
+  packages = ["pkg/version"]
+  revision = "ed135c5b96450fd24e5e981c708114fbbd950697"
+
+[[projects]]
+  branch = "master"
+  name = "k8s.io/helm"
+  packages = [
+    "pkg/chartutil",
+    "pkg/ignore",
+    "pkg/proto/hapi/chart",
+    "pkg/proto/hapi/release",
+    "pkg/proto/hapi/services",
+    "pkg/proto/hapi/version",
+    "pkg/sympath",
+    "pkg/version"
+  ]
+  revision = "aa98e7e3dd2356bce72e8e367e8c87e8085c692b"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "47d9e257fcba2e6e793a26176d5d6b415c8e2840e44bda8711e7363fd45344cc"
+  inputs-digest = "3c4cf2e3f2559667141c4cbb4edd0b85fbdd717f76c35fd1aa8471209cb30f48"
   solver-name = "gps-cdcl"
   solver-version = 1
